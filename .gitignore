@@ -3,3 +3,4 @@ venv/
 dagster_university/dagster_university.egg-info/
 dagster_university/data/
 dagster_university/tmp????????/
+**/__pycache__/
