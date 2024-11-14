@@ -56,7 +56,7 @@ def manhattan_map() -> None:
     pio.write_image(fig, constants.MANHATTAN_MAP_FILE_PATH)
 
 @asset(
-    deps=["taxi_trips"]
+    deps=["taxi_trips", "taxi_zones","manhattan_stats"]
 )
 def trips_by_week() -> None:
     conn = duckdb.connect(os.getenv("DUCKDB_DATABASE"))
@@ -83,9 +83,15 @@ def trips_by_week() -> None:
 
         aggreate["period"] = current_date
 
-        result = pd.concat([result, aggreate])
+        result : pd.DataFrame = pd.concat([result, aggreate])
 
         current_date += timedelta(days=7)
 
     # clean up the formatting of the dataframe
     result['num_trips'] = result['num_trips'].astype(int)
+    result['passenger_count'] = result['passenger_count'].astype(int)
+    result['total_amount'] = result['total_amount'].round(2).astype(float)
+    result['trip_distance'] = result['trip_distance'].round(2).astype(float)
+    result = result[['period', 'num_trips','total_amount','trip_distance','passenger_count']]
+    result = result.sort_values(by='period')
+    result.to_csv(constants.TRIPS_BY_WEEK_FILE_PATH, index = False)
